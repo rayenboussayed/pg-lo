@@ -1,0 +1,25 @@
+# .npmignore — excluded from published package
+# Note: package.json "files" is ["dist","README.md"], so this is extra safety
+
+# Source & tests (not needed at runtime)
+src/
+tests/
+examples/
+coverage/
+tmp/
+
+# Config & dev files
+tsconfig.json
+vitest.config.ts
+Makefile
+.gitignore
+.npmignore
+.eslintrc*
+.prettierrc*
+*.test.ts
+*.spec.ts
+
+# Logs & env
+*.log
+.env
+.env.*

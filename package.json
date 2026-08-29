@@ -1,0 +1,50 @@
+{
+  "name": "pg-lo",
+  "version": "1.0.0",
+  "description": "Minimal typed wrapper for PostgreSQL Large Objects with streaming + filesystem cache",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && node --check dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:e2e": "vitest run tests/e2e",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "example:basic": "tsx examples/01-basic.ts",
+    "example:faker": "tsx examples/02-faker-image.ts",
+    "example:file": "tsx examples/03-file-stream.ts",
+    "example:tx": "tsx examples/04-transaction.ts",
+    "example:http": "tsx examples/05-http-server.ts"
+  },
+  "keywords": ["postgres", "large-object", "pg", "streaming", "lo"],
+  "author": "Rayen Boussayed <rayenboussayed@gmail.com> (https://github.com/rayenboussayed)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rayenboussayed/pg-lo.git"
+  },
+  "homepage": "https://github.com/rayenboussayed/pg-lo#readme",
+  "bugs": {
+    "url": "https://github.com/rayenboussayed/pg-lo/issues"
+  },
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@types/node": "^26.4.0",
+    "@types/pg": "^8.23.1",
+    "@vitest/coverage-v8": "^4.1.11",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  }
+}
