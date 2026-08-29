@@ -2,7 +2,7 @@
 
 Minimal, typed wrapper for **PostgreSQL Large Objects** (`pg_largeobject`) with streaming + filesystem cache.
 
-> **Author:** [Rayen Boussayed](https://github.com/rayenboussayed) — `rayenboussayed@gmail.com` · Algeria, Tlemcen · [https://github.com/rayenboussayed/pg-lo](https://github.com/rayenboussayed/pg-lo)
+> **Author:** [Rayen Boussayed](https://github.com/rayenboussayed) — `rayenboussayed@gmail.com` · [https://github.com/rayenboussayed/pg-lo](https://github.com/rayenboussayed/pg-lo)
 
 [![npm version](https://img.shields.io/npm/v/pg-lo)](https://www.npmjs.com/package/pg-lo) [![license ISC](https://img.shields.io/npm/l/pg-lo)](https://github.com/rayenboussayed/pg-lo/blob/main/LICENSE)
 

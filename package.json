@@ -40,11 +40,17 @@
     "@types/node": "^26.4.0",
     "@types/pg": "^8.23.1",
     "@vitest/coverage-v8": "^4.1.11",
+    "pg": ">=6.0.0",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
-  "dependencies": {
-    "pg": "^8.23.0"
+  "peerDependencies": {
+    "pg": ">=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": false
+    }
   }
 }
