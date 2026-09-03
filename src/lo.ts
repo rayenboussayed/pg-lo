@@ -1,5 +1,5 @@
 import { Readable, Writable } from "node:stream";
-import type { Client } from "pg";
+import type { PgLoClient } from "./types.js";
 
 /** Open mode for a large object. `r` = read, `w` = write, `rw` = read+write. */
 export type LargeObjectOpenMode = "r" | "w" | "rw";
@@ -31,11 +31,11 @@ export enum SeekWhence {
  */
 export class LargeObject {
   /** Underlying `pg` client (must be inside a transaction). */
-  readonly client: Client;
+  readonly client: PgLoClient;
   /** File descriptor returned by `lo_open`. */
   readonly fd: number;
 
-  constructor(client: Client, fd: number) {
+  constructor(client: PgLoClient, fd: number) {
     this.client = client;
     this.fd = fd;
   }
@@ -101,7 +101,7 @@ export class LargeObject {
    * If `tell` returns `null`, restores to 0.
    * @returns Byte length of the object, or `null` if size could not be determined.
    */
-  async size(): Promise<number | null> {
+  async size() {
     const cur = await this.tell();
     const end = await this.seek(0, SeekWhence.END);
     if (end === null) return null;

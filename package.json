@@ -1,6 +1,6 @@
 {
   "name": "pg-lo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Minimal typed wrapper for PostgreSQL Large Objects with streaming + filesystem cache",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,7 +23,13 @@
     "example:tx": "tsx examples/04-transaction.ts",
     "example:http": "tsx examples/05-http-server.ts"
   },
-  "keywords": ["postgres", "large-object", "pg", "streaming", "lo"],
+  "keywords": [
+    "postgres",
+    "large-object",
+    "pg",
+    "streaming",
+    "lo"
+  ],
   "author": "Rayen Boussayed <rayenboussayed@gmail.com> (https://github.com/rayenboussayed)",
   "repository": {
     "type": "git",

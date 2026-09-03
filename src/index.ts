@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Client } from "pg";
 import { LargeObjectManager } from "./lom.js";
+import type { PgLoClient } from "./types.js";
 
 /** Options for {@link createPgLo}. */
 export type PgLoOptions = {
   /** Connected `pg` client. Must remain open for the manager's lifetime. */
-  client: Client;
+  client: PgLoClient;
   /** Directory for filesystem cache. Defaults to `<cwd>/tmp/pg-lo`. Created on demand. */
   tmpDir?: string;
   /** If true, remove `tmpDir` on `beforeExit`. */

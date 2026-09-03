@@ -1,10 +1,10 @@
-import type { Client } from "pg";
 import { LargeObject, SeekWhence, type LargeObjectOpenMode } from "./lo.js";
 import type { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import fs from "node:fs";
 import { tee } from "./utils.js";
 import path from "node:path";
+import type { PgLoClient } from "./types.js";
 
 /** Flag for `lo_open` — write. Matches PostgreSQL `INV_WRITE`. */
 const INV_WRITE = 0x00020000;
@@ -38,7 +38,7 @@ const INV_READ = 0x00040000;
  */
 export class LargeObjectManager {
   constructor(
-    private readonly client: Client,
+    private readonly client: PgLoClient,
     private readonly tmpDir: string,
   ) {}
 
