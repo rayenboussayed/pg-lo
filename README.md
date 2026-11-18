@@ -117,9 +117,9 @@ Regenerate after changing `src/` or any TSDoc comment, and commit the result:
 npm run docs
 ```
 
-`npm run docs` runs `npm run build` first, so the `dist:` pointer lines in each `docs/*.md` resolve against a fresh `dist/`. The docs describe the source tree of this repository, not the published package; a release can lag the tree. Do not hand-edit the generated files.
+`npm run docs` runs `npm run build` first, so the `dist:` pointer lines in each `docs/*.md` resolve against a fresh `dist/`. The docs are a view of the current source tree, not the published package; the published release can be newer or older, so check the release notes for what actually shipped. Do not hand-edit the generated files. After regenerating, `git diff --exit-code docs/` should print nothing; if it does not, your `src/` and `docs/` are out of sync and the commit must include the regenerated files.
 
-One known artifact: the `SeekWhence` enum members render as `SeekWhence[undefined]` because jsdoc-to-markdown cannot name computed enum members. The `SeekWhence` block itself carries the semantics (`SET = 0`, `CUR = 1`, `END = 2`).
+One known artifact: the `SeekWhence` enum members render as `SeekWhence[undefined]` because jsdoc-to-markdown cannot name computed enum members. The `SeekWhence` block carries only the POSIX-mirroring description; the values (`SET = 0`, `CUR = 1`, `END = 2`) live in `src/lo.ts:8`.
 
 ## Examples
 
@@ -175,7 +175,7 @@ Strict TypeScript, `verbatimModuleSyntax`, `nodenext`. Types are exported from `
 npm run test:run       # all 43 tests (34 unit, 9 e2e)
 npm run test:unit      # vitest run tests/unit — mocked pg, no DB
 npm run test:e2e       # vitest run tests/e2e — real PG + faker buffer compare
-npm run test:coverage  # v8: 92% stmts, 81% branch
+npm run test:coverage  # v8 coverage (no thresholds configured)
 ./node_modules/.bin/tsc --noEmit # typecheck (src only)
 ```
 
