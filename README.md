@@ -10,7 +10,7 @@ Minimal, typed wrapper for **PostgreSQL Large Objects** (`pg_largeobject`) with 
 - `pg` client with transaction-aware `lo_*` calls
 - `LargeObject` low-level API (`loread`/`lowrite`/`lo_lseek64`/`lo_tell64`/`lo_close`)
 - `LargeObjectManager` high-level API (`createFromStream` / `openReadableStream` with `tmpDir` cache)
-- `tee` utility (`src/utils.ts:3`) — splits a `Readable` into two `PassThrough` branches
+- `tee` utility (`src/utils.ts:24`) — splits a `Readable` into two `PassThrough` branches
 - Tests: Vitest unit (mocked) + e2e (real Postgres) + Faker image buffer compare
 
 ## Install
@@ -22,6 +22,8 @@ npm install ./packages/pg-lo
 ```
 
 Requires Node `>=18`, Postgres `>=14` (tested on `postgres:18`), `pg ^8.23`.
+
+Development (`npm install`, `npm run build`, `npm run docs`) requires Node `>=22.17` because mdaics is a dev dependency. The published package does not declare an engines constraint; its documented requirement is Node `>=18`.
 
 ## Quick start
 
@@ -56,7 +58,7 @@ See `examples/01-basic.ts:1` for runnable version.
 
 ## API
 
-### `createPgLo(options)` — `src/index.ts:12`
+### `createPgLo(options)` — `src/index.ts:40`
 
 ```ts
 import { createPgLo } from "./src/index.js";
@@ -68,7 +70,7 @@ type PgLoOptions = {
 const lom = createPgLo({ client, tmpDir: "./tmp/pg-lo" });
 ```
 
-### `LargeObjectManager` — `src/lom.ts:12`
+### `LargeObjectManager` — `src/lom.ts:39`
 
 ```ts
 class LargeObjectManager {
@@ -81,10 +83,10 @@ class LargeObjectManager {
 }
 ```
 
-- `createFromStream` (`src/lom.ts:40`) — `tee`s source: one branch → `LargeObject.getWritableStream` → `lowrite`, other → `tmpDir/<oid>` cache via `setImmediate`+`pipeline`. Must be inside `BEGIN`/`COMMIT`.
-- `openReadableStream` (`src/lom.ts:66`) — cache hit → `fs.createReadStream`, miss → `lo_open`+`seek(SET 0)`+`getReadableStream` then `tee` to populate cache.
+- `createFromStream` (`src/lom.ts:91`) — `tee`s source: one branch → `LargeObject.getWritableStream` → `lowrite`, other → `tmpDir/<oid>` cache via `setImmediate`+`pipeline`. Must be inside `BEGIN`/`COMMIT`.
+- `openReadableStream` (`src/lom.ts:139`) — cache hit → `fs.createReadStream`, miss → `lo_open`+`seek(SET 0)`+`getReadableStream` then `tee` to populate cache.
 
-### `LargeObject` — `src/lo.ts:12`
+### `LargeObject` — `src/lo.ts:32`
 
 ```ts
 class LargeObject {
@@ -101,16 +103,30 @@ enum SeekWhence { SET=0, CUR=1, END=2 }
 type LargeObjectOpenMode = "r"|"w"|"rw"
 ```
 
-### `tee(source, signal?)` — `src/utils.ts:3`
+### `tee(source, signal?)` — `src/utils.ts:24`
 
 Split a `Readable` into two `PassThrough` streams with backpressure, error and end forwarding.
+
+## Documentation
+
+Per-file API docs are generated with [mdaics](https://www.npmjs.com/package/mdaics) and committed under `docs/` (`docs/index.md`, `docs/lom.md`, `docs/lo.md`, `docs/utils.md`).
+
+Regenerate after changing `src/` or any TSDoc comment, and commit the result:
+
+```sh
+npm run docs
+```
+
+`npm run docs` runs `npm run build` first, so the `dist:` pointer lines in each `docs/*.md` resolve against a fresh `dist/`. The docs describe the source tree of this repository, not the published package; a release can lag the tree. Do not hand-edit the generated files.
+
+One known artifact: the `SeekWhence` enum members render as `SeekWhence[undefined]` because jsdoc-to-markdown cannot name computed enum members. The `SeekWhence` block itself carries the semantics (`SET = 0`, `CUR = 1`, `END = 2`).
 
 ## Examples
 
 | File | What it shows |
 |------|---------------|
 | `examples/01-basic.ts` | Buffer upload/download + `equals` compare |
-| `examples/02-faker-image.ts` | **Faker image** simulation — `faker.image.dataUri({type:'svg-base64'})` → `Buffer.from(base64)` → `createFromStream` → `openReadableStream` → `original.equals(stored)` + `Buffer.compare` + `sizeOf` — mirrors `tests/e2e/lom.e2e.test.ts:78` |
+| `examples/02-faker-image.ts` | **Faker image** simulation — `faker.image.dataUri({type:'svg-base64'})` → `Buffer.from(base64)` → `createFromStream` → `openReadableStream` → `original.equals(stored)` + `Buffer.compare` + `sizeOf` — mirrors `tests/e2e/lom.e2e.test.ts:89` |
 | `examples/03-file-stream.ts` | `fs.createReadStream` upload / `pipeline` download, file-level `equals` |
 | `examples/04-transaction.ts` | `withTransaction` helper, low-level `LargeObject` with `SeekWhence` |
 | `examples/05-http-server.ts` | **HTTP streaming** — `POST /upload` (`application/octet-stream` `req` → `createFromStream(req)`) + `GET /file/:oid` (`openReadableStream` → `pipeline(stream,res)`) with `fetch` demo + `original.equals(stored)` |
@@ -147,11 +163,11 @@ try {
 
 ## Cache
 
-`tmpDir/<oid>` stores payloads. `openReadableStream` checks `fs.existsSync` first (`src/lom.ts:72`), so second read is fast and avoids DB. `sizeOf` (`src/lom.ts:99`) uses `stat` when cached. Cache write is background (`setImmediate` → `pipeline(tee1, fs.createWriteStream)`). Provide a dedicated empty tmpDir per test run (see `tests/e2e/helpers/*`, `vitest` tmp via `fs.mkdtemp`).
+`tmpDir/<oid>` stores payloads. `openReadableStream` checks `fs.existsSync` first (`src/lom.ts:145`), so second read is fast and avoids DB. `sizeOf` (`src/lom.ts:189`) uses `stat` when cached. Cache write is background (`setImmediate` → `pipeline(tee1, fs.createWriteStream)`). Provide a dedicated empty tmpDir per test run (see `tests/e2e/helpers/*`, `vitest` tmp via `fs.mkdtemp`).
 
 ## Types
 
-Strict TypeScript, `verbatimModuleSyntax`, `nodenext`. Types are exported from `src/index.ts:6` `PgLoOptions`, `src/lo.ts:4` `LargeObjectOpenMode`/`SeekWhence`.
+Strict TypeScript, `verbatimModuleSyntax`, `nodenext`. Types are exported from `src/index.ts:7` `PgLoOptions`, `src/lo.ts:5` `LargeObjectOpenMode` and `src/lo.ts:8` `SeekWhence`.
 
 ## Testing
 
@@ -163,7 +179,7 @@ npm run test:coverage  # v8: 92% stmts, 81% branch
 ./node_modules/.bin/tsc --noEmit # typecheck (src only)
 ```
 
-E2E Faker image flow (`tests/e2e/lom.e2e.test.ts:78`): `fakeImageBuffer(1)` → `Readable.from(original)` → `createFromStream` → `await setTimeout(50)` for cache → `openReadableStream` → `streamToBuffer` → `expect(stored.equals(original)).toBe(true)` — sequential (pg client not concurrent-safe, see `examples/02-faker-image.ts`).
+E2E Faker image flow (`tests/e2e/lom.e2e.test.ts:89`): `fakeImageBuffer(1)` → `Readable.from(original)` → `createFromStream` → `await setTimeout(50)` for cache → `openReadableStream` → `streamToBuffer` → `expect(stored.equals(original)).toBe(true)` — sequential (pg client not concurrent-safe, see `examples/02-faker-image.ts`).
 
 ## Project structure
 
@@ -172,7 +188,9 @@ src/
   index.ts  — createPgLo factory
   lom.ts    — LargeObjectManager
   lo.ts     — LargeObject + SeekWhence
+  types.ts  — PgLoClient (Client | Pool); types-only, not in the generated docs
   utils.ts  — tee
+docs/     — generated API docs (npm run docs), one .md per documented src file
 tests/
   unit/     — mocked unit tests (utils, lo, lom, index)
   e2e/      — real PG + faker image buffer compare
@@ -190,4 +208,4 @@ examples/
 
 ## License
 
-ISC — see [LICENSE](LICENSE) (same as `package.json:28`)
+ISC — see [LICENSE](LICENSE) (same as `package.json:43`)
