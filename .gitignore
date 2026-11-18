@@ -39,3 +39,6 @@ Thumbs.db
 
 # pg-lo specific
 tmp/pg-lo/
+
+# Agent swarm artifacts
+.agent-swarm/
